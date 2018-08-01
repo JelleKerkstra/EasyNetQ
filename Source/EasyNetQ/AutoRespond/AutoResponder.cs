@@ -13,7 +13,6 @@ namespace EasyNetQ.AutoRespond
     /// </summary>
     public class AutoResponder
     {
-        protected const string HandleAsyncMethodName = nameof(IHandleRequestAsync<object, object>.HandleAsync);
         protected const string DispatchAsyncMethodName = nameof(IAutoResponderRequestDispatcher.DispatchAsync);
         protected const string RespondAsyncMethodName = nameof(IBus.RespondAsync);
         protected readonly IBus bus;
@@ -87,7 +86,7 @@ namespace EasyNetQ.AutoRespond
                     var dispatchDelegate = Delegate.CreateDelegate(responderDelegate(responderInfo.RequestType, responderInfo.ResponseType), AutoResponderRequestDispatcher, dispatchMethod);
 #endif
 
-                    Action<IResponderConfiguration> configAction = GenerateConfigurationAction(responderInfo);
+                    var configAction = GenerateConfigurationAction(responderInfo);
                     var busRespondMethod = genericBusRepondMethod.MakeGenericMethod(responderInfo.RequestType, responderInfo.ResponseType);
                     busRespondMethod.Invoke(bus, new object[] { dispatchDelegate });
                 }
