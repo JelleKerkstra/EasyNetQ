@@ -13,11 +13,8 @@ namespace EasyNetQ.AutoRespond
     /// </summary>
     public class AutoResponder
     {
-        protected const string HandleMethodName = nameof(IHandleRequest<object, object>.Handle);
         protected const string HandleAsyncMethodName = nameof(IHandleRequestAsync<object, object>.HandleAsync);
-        protected const string DispatchMethodName = nameof(IAutoResponderRequestDispatcher.Dispatch);
         protected const string DispatchAsyncMethodName = nameof(IAutoResponderRequestDispatcher.DispatchAsync);
-        protected const string RespondMethodName = nameof(IBus.Respond);
         protected const string RespondAsyncMethodName = nameof(IBus.RespondAsync);
         protected readonly IBus bus;
 
@@ -41,34 +38,6 @@ namespace EasyNetQ.AutoRespond
             this.bus = bus;
             AutoResponderRequestDispatcher = new DefaultAutoResponderRequestDispatcher();
             ConfigureResponderConfiguration = responderConfiguration => { };
-        }
-
-        /// <summary>
-        /// Registers all request handlers in passed assembly. The actual responder instances is
-        /// created using <seealso cref="AutoResponderRequestDispatcher"/>.
-        /// </summary>
-        /// <param name="assemblies">The assemblies to scan for request handlers.</param>
-        public virtual void Respond(params Assembly[] assemblies)
-        {
-            Preconditions.CheckAny(assemblies, "assemblies", "No assemblies specified.");
-
-            Respond(assemblies.SelectMany(a => a.GetTypes()).ToArray());
-        }
-
-        /// <summary>
-        /// Registers all types as request handlers. The actual responder instances is
-        /// created using <seealso cref="AutoResponderRequestDispatcher"/>.
-        /// </summary>
-        /// <param name="requestHandlerTypes">the types to register as request handlers.</param>
-        public virtual void Respond(params Type[] requestHandlerTypes)
-        {
-            if (requestHandlerTypes == null) throw new ArgumentNullException(nameof(requestHandlerTypes));
-
-            var genericBusRespondMethod = GetRespondMethodOfBus(RespondMethodName, typeof(Func<,>));
-            var responderInfos = GetResponderInfos(requestHandlerTypes, typeof(IHandleRequest<,>));
-            Type ResponderDelegate(Type requestType, Type responseType) => typeof(Func<,>).MakeGenericType(requestType, responseType);
-
-            InvokeMethods(responderInfos, DispatchMethodName, genericBusRespondMethod, ResponderDelegate);
         }
 
         /// <summary>

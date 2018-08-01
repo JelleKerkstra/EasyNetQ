@@ -18,18 +18,6 @@ namespace EasyNetQ.AutoRespond
         {
         }
 
-        public TResponse Dispatch<TRequest, TResponse, TResponder>(TRequest request)
-            where TRequest : class
-            where TResponse : class
-            where TResponder : class, IHandleRequest<TRequest, TResponse>
-        {
-            using (var scope = resolver.CreateScope())
-            {
-                var responder = scope.Resolve<TResponder>();
-                return responder.Handle(request);
-            }
-        }
-
         public async Task<TResponse> DispatchAsync<TRequest, TResponse, TAsyncResponder>(TRequest request)
             where TRequest : class
             where TResponse : class
